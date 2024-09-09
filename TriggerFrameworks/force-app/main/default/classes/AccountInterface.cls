@@ -1,0 +1,9 @@
+public interface AccountInterface {
+    void before_insert(List<sObject> newRecordsList);//we know that we get trigger.new context which only returns a list of sobject hence why we only pass one parameter because in a before insert you can only get a trigger.new context not the old
+    void after_Insert(List<sObject> newRecordsList, map<Id,sObject> newRecordsMap);//we get two trigger context which is trigger.new and trigger.old
+    void before_update(map<Id,sObject> newRecordsMap, map<Id,sObject> oldRecordsMap);//We get all four trigger contexts which is trigger.new,trigger.old, trigger.newMap, trigger.oldMap. so instead of passing all the four we only pass two -because in trigger.newMap you can get the id's of the object same with trigger.newMap(meaning we dont need to pass the other two)
+    void after_update(map<Id,sObject> newRecordsMap, map<Id,sObject> oldRecordsMap);//same as above - We get all four trigger contexts which is trigger.new,trigger.old, trigger.newMap, trigger.oldMap. so instead of passing all the four we only pass two -because in trigger.newMap you can get the id's of the object same with trigger.newMap(meaning we dont need to pass the other two)
+    void before_delete(List<sObject> oldRecordsList, map<Id,sObject> oldRecordsMap);//we get trigger.old and trigger.oldMap
+    void after_delete(map<Id,sObject> oldRecordsMap);//we pass only one parameter because the map is gonna return a list of sobjects and set of ids.
+    void after_undelete(List<sObject> newRecordsList, map<Id,sObject> newRecordsMap);//this works the same as afterInsert hence we pass the same parameters
+}

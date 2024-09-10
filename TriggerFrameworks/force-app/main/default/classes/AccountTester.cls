@@ -105,4 +105,88 @@ public with sharing class AccountTester {
         //Compare data
         System.Assert(lstOpportunities != null, 'Opportunity was not created');
     }
+
+    @isTest
+    public static void minimumAnnualRevenueTest(){
+        //Create Data
+        List<Account> lstAcc = new List<Account>();
+        for(Integer x = 1; x <= 5; x++){
+            Account acc = new Account();
+            acc.Name = 'Huawei' + x;
+            acc.RecordTypeId = '0128d000001ODfvAAG';
+            acc.AnnualRevenue = 10000;
+            lstAcc.add(acc);
+        }
+        //Insert data
+        test.startTest();
+            insert lstAcc;
+        test.stopTest();
+        
+        //Retrieve data
+        List<Account> listAccount = [SELECT Id, AnnualRevenue FROM Account WHERE Id =: lstAcc[0].Id];
+
+        //Compare data
+        System.assertEquals(10000, listAccount[0].AnnualRevenue);
+    }
+
+    @isTest
+    public static void preventAccountDeletionTest(){
+        //Create the test accounts
+        List<Account> lstAcc = new List<Account>();
+        for(Integer x = 0; x <= 5; x++){
+            Account acc = new Account();
+            acc.Name = 'Barcadi' + 1;
+            acc.RecordTypeId = '0128d000001ODfvAAG';
+
+            lstAcc.add(acc);
+        }
+        if(!lstAcc.isEmpty()){
+            insert lstAcc;
+        }
+        //Create and insert Opportunity records associated with the accounts
+        List<Opportunity> testOpportunities = new List<Opportunity>();
+        for(Account acc : lstAcc){
+            Opportunity opp = new Opportunity();
+            opp.Name = 'Opportunity ' + acc.Name;
+            opp.CloseDate = Date.today().addDays(20);
+            opp.StageName = 'Needs Analysis';
+            opp.AccountId = acc.Id;
+            testOpportunities.add(opp);
+        }
+        //insert the opportunitties
+        insert testOpportunities;
+
+        //Try to delete the accounts
+        test.startTest();
+        try {
+            delete lstAcc;
+            System.assert(false,'Account should not be deletable when associated with an account');
+        } catch (DmlException e) {
+            System.assert(e.getMessage().contains('Cannot delete account with existing opportunities'), 'Expected exception was not thrown');
+        }
+        test.stopTest();
+
+    }
+
+    @isTest
+    public static void accountAfterDeletionTest(){
+        List<Account> lstAccount = new List<Account>();
+        for(Integer x = 0; x <= 5; x++){
+            Account acc = new Account();
+            acc.Name = 'Stella' + 1;
+            acc.RecordTypeId = '0128d000001ODfvAAG';
+
+            lstAccount.add(acc);
+        }
+        if(!lstAccount.isEmpty()){
+            insert lstAccount;
+        }
+
+        try {
+            delete lstAccount;
+            System.assert(true, 'Account was deleted');
+        } catch (DmlException e) {
+            System.assert(e.getMessage().contains('Cannot delete account'), 'Expected exception was not thrown');
+        }
+    }
 }
